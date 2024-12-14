@@ -7,7 +7,7 @@ using Gurobi
 
 # We consider the production problem from Ben-Tal et al (2004). 
 
-include("../src/lp_solvers.jl")
+include("../src/lp_solvers_revision.jl")
 include("../src/algorithm_full.jl")
 
 
@@ -186,7 +186,7 @@ function main(methods=["dual","activeset"])
             println("=============== Dual ===============")
 
             # Create output file
-            outfile = string("../output/dual.csv")
+            outfile = string("output/dual.csv")
             f_out = open(outfile,"w")
 
             # Create header to the output file
@@ -197,15 +197,18 @@ function main(methods=["dual","activeset"])
                                 "y_nonzero", ",",   # Number of nonzero parameters in y
                                 "time", ",",        # Time for current iteration
                                 "zeta_nonzero", ",",
-                                "Method", ",",
-                                "gap") # Number of nonzero parameters in ζ)
+                                "Method",
+                                ) # Number of nonzero parameters in ζ)
             row_string = string(row_string, "\n")
             print(f_out,row_string)
             flush(f_out)
 
             # Run experiment
-            for E=[5], time_factor=[2,4,6,8,10], method = [2], gap = [0.1,0.01,0.001]
-
+            for E=[5], time_factor=[2,4,6,8,10], method = [0,1,2,6]
+            # for E=[5], time_factor=[2], method = [0,1,2,6]
+                print("time factor=",time_factor,"\n")
+                print("method=",method,"\n")
+                
 
                 ###########################################################################
                 # Set up the problem instance
@@ -218,7 +221,7 @@ function main(methods=["dual","activeset"])
                 # Run algorithm
                 ###########################################################################
 
-                time_elapsed =  @elapsed  obj_val_D, y_D, ζ_D, λ_D = DualLPSolver(a,b,c,D_min,D_max,method,gap)
+                time_elapsed =  @elapsed  obj_val_D, y_D, ζ_D, λ_D = DualLPSolver(a,b,c,D_min,D_max,method)
 
 
                 ###########################################################################
@@ -236,8 +239,8 @@ function main(methods=["dual","activeset"])
                                     num_nonzero_y_D, ",", # Number of nonzero parameters in y
                                     time_elapsed, ",",        # Time for current iteration
                                     num_nonzero_ζ_D, ",",
-                                    method,",",
-                                    gap) 
+                                    method,","
+                                    ) 
                 row_string = string(row_string, "\n")
                 print(f_out,row_string)
                 flush(f_out)
@@ -250,7 +253,7 @@ function main(methods=["dual","activeset"])
             println("=============== Active Set Method ===============")
 
             # Create output file
-            outfile = string("../output/activeset.csv")
+            outfile = string("output/activeset.csv")
             f_out = open(outfile,"w")
 
             # Create header to the output file
@@ -273,6 +276,7 @@ function main(methods=["dual","activeset"])
 
             # Run experiment
             for E=[5], time_factor=[2,4,6,8,10],removal=[true]
+            # for E=[5], time_factor=[2],removal=[true]
                
                 ###########################################################################
                 # Set up the problem instance
@@ -295,3 +299,4 @@ function main(methods=["dual","activeset"])
     end
 end
 
+main()
